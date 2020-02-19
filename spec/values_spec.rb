@@ -230,4 +230,47 @@ describe Value do
       expect(Point.new(1, -1).to_a).to eq([[:x, 1], [:y, -1]])
     end
   end
+
+  Point3 = Value.new(:x, :y, :z)
+
+  describe '#deconstruct' do
+    it 'returns fields in an array' do
+      expect(Point.new(1,2).deconstruct()).to eq([1,2])
+    end
+
+    if RUBY_VERSION >= '2.7'
+      it 'can be used for pattern matching with array syntax' do
+        actual = case Point.new(1,2)
+          in Point3[x, y, z]
+            "this shouldn't match"
+          in Point[1 => x, y]
+            "x=#{x} y=#{y}"
+          in Point[x, y]
+            "this shouldn't match"
+        end
+        expect(actual).to eq("x=1 y=2")
+      end
+    end
+  end
+
+  describe '#deconstruct_keys' do
+    it 'returns fields in an array' do
+      expect(Point3.new(1,2,3).deconstruct_keys([:x, :z])).to eq({x: 1, z: 3})
+    end
+
+    if RUBY_VERSION >= '2.7'
+      Point3 = Value.new(:x, :y, :z)
+      it 'can be used for pattern matching with array syntax' do
+        actual = case Point3.new(1,2,3)
+          in Point3[x: 1, z:]
+            "z=#{z}"
+          in Point3[x, y, z]
+            "this shouldn't match"
+          in Point[x, y]
+            "this shouldn't match"
+        end
+        expect(actual).to eq("z=3")
+      end
+    end
+  end
 end

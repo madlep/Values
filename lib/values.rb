@@ -111,6 +111,14 @@ class Value
         self.class::VALUE_ATTRS.map { |field| [field, send(field)] }
       end
 
+      def deconstruct
+        to_h.values
+      end
+
+      def deconstruct_keys(keys)
+        to_h.slice(*keys)
+      end
+
       class_eval &block if block
     end
   end
